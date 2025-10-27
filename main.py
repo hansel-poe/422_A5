@@ -1,4 +1,5 @@
 import random
+import matplotlib.pyplot as plt
 from collections import deque
 
 #Num of samples
@@ -100,13 +101,36 @@ def generate_samples(n, var, val = False, givens = []):
 
     return probs
 
+def graph(x, y, ve_val):
+    # Note that even in the OO-style, we use `.pyplot.figure` to create the Figure.
+    fig, ax = plt.subplots(figsize=(10, 5), layout='constrained')
+    ax.set_xscale('log')
+    ax.plot(x, y, label='Gibbs Sampling')  # Plot some data on the Axes.
+    ax.set_xlabel('Number of samples')  # Add an x-label to the Axes.
+    ax.set_ylabel('P(E = e0 | b1, c0)')  # Add a y-label to the Axes.
+    ax.set_title('P(E = e0 | b1, c0) vs Number of Samples')  # Add a title to the Axes.
+
+    plt.axhline(y=ve_val, label='Variable Elimination', color = 'r') #plot horizontal line showing result from variable elimination
+
+    plt.legend()
+    plt.show()
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print(f_fa[0][1], f_ab[1][1])
-    print(getDistVar('A', True, False))
-    print(getDistVar('D', False, False))
-    givens = {'B': True, 'C': False}
+    # Test
+    # print(f_fa[0][1], f_ab[1][1])
+    # print(getDistVar('A', True, False))
+    # print(getDistVar('D', False, False))
 
+    givens = {'B': True, 'C': False}
     probs = generate_samples(N, 'E', False, givens)
+    x = range(1,100001)
+    # print(len(probs))
+    # print(probs[0:30])
+    graph(x,probs, 0.197)
+    print(probs[99995:])
+
+
 
 
