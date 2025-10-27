@@ -1,4 +1,5 @@
 import random
+from collections import deque
 
 #Num of samples
 N = 100000
@@ -47,6 +48,16 @@ factorsMap = {
     'F': (f_ef,f_fa)
 }
 
+#Formar is (left, right)
+neighborsMap = {
+    'A': ('F','B'),
+    'B': ('A','C'),
+    'C': ('B','D'),
+    'D': ('C','E'),
+    'E': ('D','F'),
+    'F': ('E','A')
+}
+
 #Generates sample given the probability distribution
 def getSample(pTrue,pFalse):
     if random.uniform(0,1) <= pTrue:
@@ -64,15 +75,38 @@ def getDistVar(varName, varLeftValue, varRightValue):
     norm = [float(i)/sum(dist) for i in dist]
     return norm
 
-def generate_samples(n):
-    return
+#compute P(var = val  | givens) over n samples
+def generate_samples(n, var, val = False, givens = []):
+    for i in currDict: currDict[i] = getSample(0.5,0.5) #assign randomly with uniform dist
+    for given in givens: currDict[given] = givens[given] #assign given variables
 
+    rotationVars = [i for i in currDict if i not in givens]
+    de = deque(rotationVars)
+    probs = []
+    count_dict = {
+        False:0,
+        True:0
+    }
+    for i in range(n):
+        toSample = de.popleft() #get var to sample
+        left, right = neighborsMap[toSample]
+        dist = getDistVar(toSample, currDict[left], currDict[right])
+        sample = getSample(dist[1], dist[0])
+        currDict[toSample] = sample
 
-someList = [121,345,556]
+        count_dict[currDict[var]] += 1
+        probs.append(count_dict[val] / (i + 1))
+        de.append(toSample)#put back var in the back
+
+    return probs
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print(f_fa[0][1], f_ab[1][1])
     print(getDistVar('A', True, False))
     print(getDistVar('D', False, False))
+    givens = {'B': True, 'C': False}
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    probs = generate_samples(N, 'E', False, givens)
+
+
